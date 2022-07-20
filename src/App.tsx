@@ -1,24 +1,22 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import ImageUploader from './Components/ImageUploader';
+import UrlShortner from './Components/UrlShortner';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <h1>
+      Mega Mix!
+      </h1>
+      <ul style={{textAlign: 'left'}}>
+        <li>
+          <UrlShortner/>
+        </li>
+        <li>
+          <ImageUploader/>
+        </li>
+      </ul>
     </div>
   );
 }
