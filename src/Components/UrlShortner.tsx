@@ -10,8 +10,11 @@ function UrlShortner() {
         setLongUrl(link);
     }
 
+    /**
+     * Original Link: https://o0tbxfxrj6.execute-api.ap-south-1.amazonaws.com/url_shortner
+     */
     function handleShortUrl(): void {
-        fetch('https://o0tbxfxrj6.execute-api.ap-south-1.amazonaws.com/url_shortner', {
+        fetch('https://s6pdlyygmj.execute-api.ap-south-1.amazonaws.com/Prod/url-us', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -19,13 +22,11 @@ function UrlShortner() {
             body: JSON.stringify({longUrl})
         })
         .then(async (response) => {
-            const data: {successCode: Number, data?: String, error?: String} = await response.json();
-            if(data.successCode === 400) {
-                setShortUrl(data.error);
-            }
-            else {
-                setShortUrl(data.data);
-            }
+            const data: String = await response.json();
+            setShortUrl(data);
+        })
+        .catch(err => {
+            setShortUrl(err);
         })
     }
 

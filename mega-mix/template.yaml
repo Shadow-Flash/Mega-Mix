@@ -1,0 +1,149 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mega-mix
+
+  Sample SAM Template for mega-mix
+
+Globals:
+  Function:
+    Runtime: nodejs16.x
+    Tracing: Active
+
+Resources:
+  DocumentTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: vg-sam
+      PrimaryKey:
+        Type: String 
+        Name: urlID
+      
+  ApiForUploadImage:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: vg-sam-ui
+      StageName: dev
+      BinaryMediaTypes: 
+        - image/*
+      Cors: "'*'"
+      DefinitionBody:
+        swagger: "2.0"
+        paths:
+          "/url-ui":
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: "POST"
+                type: aws_proxy
+                uri: "arn:aws:apigateway:ap-south-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-south-1:960351580303:function:vg-sam-ui/invocations"
+
+  CloudFrontDistForUSR:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Origins:
+        - DomainName: "s6pdlyygmj.execute-api.ap-south-1.amazonaws.com"
+          OriginPath: /Prod
+          Id: vg-sam-usr
+          CustomOriginConfig:
+            HTTPPort: 80
+            HTTPSPort: 443
+            OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: vg-sam-usr
+          SmoothStreaming: false
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: all
+          ViewerProtocolPolicy: redirect-to-https
+  UrlShortner:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: vg-sam-us
+      CodeUri: functions/url-shortner/
+      Handler: index.handler
+      Role: arn:aws:iam::960351580303:role/mega_mix
+      Events:
+        ApiUrlShortner:
+          Type: Api
+          Properties:
+            Method: POST
+            Path: /url-us
+
+  UrlShortnerRetriver:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: vg-sam-usr
+      CodeUri: functions/url-shortner-retriver
+      Handler: index.handler
+      Role: arn:aws:iam::960351580303:role/mega_mix
+      Events:
+        ApiUrlShortner:
+          Type: Api
+          Properties:
+            Method: GET
+            Path: /t/{urlID}
+
+  UploadImage:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: vg-sam-ui
+      CodeUri: functions/upload-image
+      Handler: index.handler
+      Role: arn:aws:iam::960351580303:role/mega_mix
+      Events:
+        ApiUrlShortner:
+          Type: Api
+          Properties:
+            RestApiId: !Ref ApiForUploadImage
+            Method: POST
+            Path: /url-ui
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties: 
+      Bucket: !Ref S3BucketForImage
+      PolicyDocument: 
+        Version: 2012-10-17
+        Statement: 
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref S3BucketForImage
+                - /*
+            Principal: '*'
+
+  S3BucketForImage:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: vg-sam-ui
+      ObjectLockEnabled: false
+      
+Outputs:
+  DocumentTable:
+    Description: "Document Table Name"
+    Value: !Ref DocumentTable
+  Api:
+    Description: "Api"
+    Value: !Sub "https://${ApiForUploadImage}.execute-api.ap-south-1.amazonaws.com/dev/url-ui"
+  CloudFront:
+    Description: "CloudFront Address"
+    Value: !GetAtt CloudFrontDistForUSR.DomainName
+  Function1:
+    Description: "Url-Shortner function in AWS"
+    Value: !Ref UrlShortner
+  Function2:
+    Description: "Url-Shortner-Retriver function in AWS"
+    Value: !Ref UrlShortnerRetriver
+  Function3:
+    Description: "Upload Image function in AWS"
+    Value: !Ref UploadImage
+  S3Bucket:
+    Description: "S3Bucket to store images"
+    Value: !GetAtt S3BucketForImage.DomainName

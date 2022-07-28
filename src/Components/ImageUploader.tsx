@@ -10,20 +10,17 @@ function ImageUploader() {
     }
 
     function handleUploadBtn(): void {
-        fetch('https://9mosgdrq5b.execute-api.ap-south-1.amazonaws.com/upload_image/image/', {
+        fetch('https://bf6tln19qj.execute-api.ap-south-1.amazonaws.com/dev/url-ui', {
             method: 'POST',
             headers : {"Content-Type": "image/jpeg"},
             body: selectedImg
         })
         .then(async (response) => {
-            const data: {statusCode: Number, body?: String, error?: String} = await response.json();
-            if(data.statusCode !== 200) {
-                setShortUrl(data.error);
-                console.error("ERROR");
-            }
-            else {
-                setShortUrl(data.body.replace(/['"]+/g, ''));
-            }
+            const data: String = await response.json();
+            setShortUrl(data);  
+        })
+        .catch(err => {
+            setShortUrl(err);
         })
     }
 
