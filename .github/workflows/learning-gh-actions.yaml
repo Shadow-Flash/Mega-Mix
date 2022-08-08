@@ -11,15 +11,15 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '16'
+      - uses: aws-actions/setup-sam@v2
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
       - name: checkout to other dir
         working-directory: ./mega-mix
         run: ls
-      # - uses: aws-actions/setup-sam@v2
-      # - uses: aws-actions/configure-aws-credentials@v1
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ap-south-1
-        
-      
-      # - run: sam deploy --config-file "./samconfig.toml" --stack-name "mega-mix"
+      - name: running sam
+        working-directory: ./mega-mix
+        run: sam deploy --config-file "./samconfig.toml"
