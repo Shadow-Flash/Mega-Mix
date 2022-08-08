@@ -19,4 +19,5 @@ jobs:
           aws-region: ap-south-1
       - run: cd mega-mix
       - run: pwd
+      - run: ls
       - run: sam deploy --config-file "./samconfig.toml" --stack-name "mega-mix"
