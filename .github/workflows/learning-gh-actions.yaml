@@ -17,4 +17,5 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
-      - run: sam deploy --config-env "../../mega-mix/samconfig.toml"
+      - run: cd mega-mix
+      - run: sam deploy --config-file "./samconfig.toml"
