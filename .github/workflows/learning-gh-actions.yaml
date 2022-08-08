@@ -1,7 +1,7 @@
 name: learn-gh-actions
 on: [push]
 jobs:
-  installing-packages:
+  sam-inprogress:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,10 +17,6 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
-  running-the-sam:
-    runs-on: ubuntu-latest
-    steps:
       - name: running sam
         working-directory: ./mega-mix
-        run: sam --version && echo "YEAH IT IS WORKING!!"
-      
+        run: sam deploy --config-file "./samconfig.toml"
